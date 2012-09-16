@@ -10,13 +10,14 @@
 #import "TouchXML.h"
 #import "GTMNSString+HTML.h"
 
-@interface RssItem : NSObject
+@interface RssItem : NSManagedObject
 
+@property NSString *channel;
 @property NSString *title;
 @property NSURL *link;
 @property NSString *date;
 @property NSString *description;
-@property NSData *enclosure;
+@property NSString *enclosure;
 
 - (id)init;
 - (id)initWithArray:(NSDictionary *) dictionary;

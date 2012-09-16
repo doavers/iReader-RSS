@@ -8,6 +8,7 @@
 
 #import "RootViewController.h"
 #import "RssItemCell.h"
+#import "DetailViewController.h"
 
 @interface RootViewController ()
 @end
@@ -29,7 +30,7 @@
 {
     [super viewDidLoad];
 	
-	self.navigationItem.title = @"FooBar!";
+	self.navigationItem.title = @"Articles";
 	self.rssItems = nil;
 	self.rssLoader = nil;
 	
@@ -94,7 +95,19 @@
         
 	cell.title.text = item.title;
 	cell.description.text = item.description;
-	cell.enclosure =  [[UIImageView alloc] initWithImage:[UIImage imageWithData:item.enclosure]];
+	[cell.enclosureLoader startAnimating];
+	cell.enclosureLoader.hidden = NO;
+	
+	dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0ul);
+	dispatch_async(queue,
+				   ^{
+					   UIImage *enclosure_rawImage = [[UIImage alloc] initWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:item.enclosure]]];
+					   [cell.enclosure  setImage:enclosure_rawImage];
+					   [cell.enclosureLoader stopAnimating];
+					   cell.enclosureLoader.hidden = YES;
+				   });
+
+	
     return cell;
 }
 
@@ -122,19 +135,23 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    // Navigation logic may go here. Create and push another view controller.
-    /*
-     <#DetailViewController#> *detailViewController = [[<#DetailViewController#> alloc] initWithNibName:@"<#Nib name#>" bundle:nil];
-     // ...
-     // Pass the selected object to the new view controller.
-     [self.navigationController pushViewController:detailViewController animated:YES];
-     */
+	[self performSegueWithIdentifier:@"RssItemDetail" sender:self];
+}
+
+
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+{
+	if([segue.identifier isEqualToString:@"RssItemDetail"])
+	{
+		DetailViewController *controller = [segue destinationViewController];
+		controller.rssItem = [self.rssItems objectAtIndex:self.tableView.indexPathForSelectedRow.row];
+	}
 }
 
 #pragma mark - RssLoader delegate
 - (void)feedTitleUpdated:(NSString *)title
 {
-	self.navigationItem.title = title;
+	//self.navigationItem.title = title;
 }
 
 - (void)rssItemsUpdated:(NSMutableArray *)items

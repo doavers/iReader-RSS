@@ -7,7 +7,19 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "RssItem.h"
 
-@interface DetailViewController : UIViewController
+@interface DetailViewController : UIViewController <UIWebViewDelegate>
+
+@property (strong, nonatomic) IBOutlet UIWebView *webview;
+@property (strong, nonatomic) IBOutlet UIActivityIndicatorView *loader;
+@property (strong, nonatomic) IBOutlet UIBarButtonItem *navigationBackButton;
+@property (strong, nonatomic) IBOutlet UIBarButtonItem *navigationForwardButton;
+
+@property RssItem* rssItem;
+
+
+- (IBAction)onForwardButtonPressed:(id)sender;
+- (IBAction)onBackButtonPressed:(id)sender;
 
 @end

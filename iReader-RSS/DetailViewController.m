@@ -9,16 +9,19 @@
 #import "DetailViewController.h"
 
 @interface DetailViewController ()
-
 @end
 
+
 @implementation DetailViewController
+
+@synthesize webview, rssItem;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
-    if (self) {
-        // Custom initialization
+    if (self)
+	{
+		
     }
     return self;
 }
@@ -26,7 +29,8 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-	// Do any additional setup after loading the view.
+	[webview loadRequest:[NSURLRequest requestWithURL:self.rssItem.link]];
+	self.webview.delegate = self;
 }
 
 - (void)didReceiveMemoryWarning
@@ -35,4 +39,48 @@
     // Dispose of any resources that can be recreated.
 }
 
+- (IBAction)onBackButtonPressed:(id)sender
+{
+	[self.webview goBack];
+}
+
+- (IBAction)onForwardButtonPressed:(id)sender
+{
+	[self.webview goForward];
+}
+
+#pragma mark - UIWebView delegate
+- (void)webViewDidStartLoad:(UIWebView *)webView
+{
+	self.loader.hidden = NO;
+	[self.loader startAnimating];
+	
+	if(self.webview.canGoForward)
+	{
+		if(!self.navigationForwardButton.enabled)
+			self.navigationForwardButton.enabled = YES;
+	}
+	else
+	{
+		if(self.navigationForwardButton.enabled)
+			self.navigationForwardButton.enabled = NO;
+	}
+	
+	if(self.webview.canGoBack)
+	{
+		if(!self.navigationBackButton.enabled)
+			self.navigationBackButton.enabled = YES;
+	}
+	else
+	{
+		if(self.navigationBackButton.enabled)
+			self.navigationBackButton.enabled = NO;
+	}
+}
+
+- (void)webViewDidFinishLoad:(UIWebView *)webView
+{
+	self.loader.hidden = YES;
+	[self.loader stopAnimating];
+}
 @end

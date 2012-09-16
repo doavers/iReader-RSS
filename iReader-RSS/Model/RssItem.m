@@ -17,6 +17,7 @@
 
 @implementation RssItem
 
+@synthesize channel;
 @synthesize title;
 @synthesize date;
 @synthesize description;
@@ -50,18 +51,28 @@
 
 - (id)initWithXmlElement:(CXMLElement *)xmlElement
 {
+	NSString *rawDescription, *unescapedDescription;
 	NSError *error;
 	
 	title = [[xmlElement nodeForXPath:@"title" error:&error] stringValue];
 	date = [[xmlElement nodeForXPath:@"pubDate" error:&error] stringValue];
 	
-	NSString *rawDescription = [[xmlElement nodeForXPath:@"description" error:&error] stringValue];
+	rawDescription = [[xmlElement nodeForXPath:@"description" error:&error] stringValue];
 	if(rawDescription)
-		description = [rawDescription gtm_stringByUnescapingFromHTML];
+		 unescapedDescription = [rawDescription gtm_stringByUnescapingFromHTML];
 	
-	enclosure = [[NSData alloc] initWithContentsOfURL:[NSURL URLWithString:[[xmlElement nodeForXPath:@"enclosure" error:&error] stringValue]]];
+	NSLog(@"DEBUG unescapedDescription : %@ \n", unescapedDescription);
+	NSRange rangeOfSubstring = [unescapedDescription rangeOfString:@"<img"];
+	
+	if(rangeOfSubstring.location != NSNotFound)
+		description = [unescapedDescription substringToIndex:rangeOfSubstring.location];
+	
+	
+	enclosure = [[xmlElement nodeForXPath:@"enclosure/attribute::url" error:&error] stringValue];
+	
 	link = [[NSURL alloc] initWithString:[[xmlElement nodeForXPath:@"link" error:nil] stringValue]];
-	[self debugLogs];
+	
+	//[self debugLogs];
 	return self;
 }
 
@@ -72,6 +83,7 @@
 	NSLog(@"title: %@\n", title);
 	NSLog(@"Date: %@", date);
 	NSLog(@"Description: %@", description);
+	NSLog(@"Enclosure: %@", enclosure);
 	NSLog(@"link: %@\n", link);
 	NSLog(@"------------------------------------\n");
 }
