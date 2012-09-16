@@ -10,7 +10,7 @@
 #import "TouchXML.h"
 #import "GTMNSString+HTML.h"
 
-@interface RssItem : NSManagedObject
+@interface RssItem : NSObject
 
 @property NSString *channel;
 @property NSString *title;

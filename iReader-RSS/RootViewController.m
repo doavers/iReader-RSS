@@ -22,8 +22,10 @@
 		self.rssLoader = [[RssLoader alloc] init];
 		self.rssLoader.delegate = self;
 	}
-	NSURL *url = [[NSURL alloc] initWithString:@"http://www.lemonde.fr/rss/tag/technologies.xml"];
-	[self.rssLoader loadWithURL:url];
+	self.selector = [RSSChannelSelector sharedRSSChannel];
+	self.selector.delegate = self;
+	[self.selector setCurrentChannelFromString:Key_LeMondeTechnologies];
+
 }
 #pragma mark TableViewController life cycle
 - (void)viewDidLoad
@@ -149,11 +151,6 @@
 }
 
 #pragma mark - RssLoader delegate
-- (void)feedTitleUpdated:(NSString *)title
-{
-	//self.navigationItem.title = title;
-}
-
 - (void)rssItemsUpdated:(NSMutableArray *)items
 {
 	self.rssItems = items;
@@ -165,4 +162,9 @@
 	[[[UIAlertView alloc] initWithTitle:@"Error" message:[error description] delegate:nil cancelButtonTitle:@"Ok"otherButtonTitles:nil] show];
 }
 
+#pragma mark - RSSChannelSelector delegate
+- (void)currentChannelChanged
+{
+	[self.rssLoader loadWithURL:[self.selector getCurrentChannel]];
+}
 @end

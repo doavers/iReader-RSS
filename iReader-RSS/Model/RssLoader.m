@@ -61,10 +61,6 @@
 	}
 	
 	self.loaded = YES;
-	NSString *title = [[[parser rootElement] nodeForXPath:@"/rss/channel/title" error:nil] stringValue];
-	NSLog(@"DEBUG: %@ ", title);
-	
-	[self.delegate performSelectorOnMainThread:@selector(feedTitleUpdated:) withObject:title waitUntilDone:YES];
 	
 	NSArray *xmlElements = [[parser rootElement] nodesForXPath:@"channel//item" error:nil];
 	

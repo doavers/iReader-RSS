@@ -14,7 +14,6 @@
 @required
 - (void)rssItemsUpdated:(NSArray *)items;
 - (void)updateFailedWithError:(NSError *)error;
-- (void)feedTitleUpdated:(NSString *)title;
 @end
 
 @interface RssLoader : NSObject
