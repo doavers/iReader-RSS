@@ -17,7 +17,7 @@
 @property NSURL *link;
 @property NSString *date;
 @property NSString *description;
-@property NSString *enclosure;
+@property NSURL *enclosure;
 
 - (id)init;
 - (id)initWithArray:(NSDictionary *) dictionary;

@@ -19,7 +19,6 @@
 static RSSChannelSelector *_sharedRssChannel;
 
 
-
 + (RSSChannelSelector*)sharedRSSChannel
 {
 	@synchronized([_sharedRssChannel class])

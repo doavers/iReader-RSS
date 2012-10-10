@@ -15,7 +15,6 @@
 @property RssLoader *rssLoader;
 @property NSMutableArray *rssItems;
 @property BOOL connected;
-@property RSSChannelSelector *selector;
 
 - (void)fetchRssItems;
 

@@ -11,6 +11,7 @@
 #import "DetailViewController.h"
 
 @interface RootViewController ()
+- (void)refresh;
 @end
 
 @implementation RootViewController
@@ -22,10 +23,15 @@
 		self.rssLoader = [[RssLoader alloc] init];
 		self.rssLoader.delegate = self;
 	}
-	self.selector = [RSSChannelSelector sharedRSSChannel];
-	self.selector.delegate = self;
-	[self.selector setCurrentChannelFromString:Key_LeMondeTechnologies];
+	[RSSChannelSelector sharedRSSChannel].delegate = self;
+	[[RSSChannelSelector sharedRSSChannel] setCurrentChannelFromString:Key_LeMondeTechnologies];
 
+}
+
+- (void)refresh
+{
+	self.refreshControl.attributedTitle =[[NSAttributedString alloc] initWithString:@"Refreshing"];
+	[self.rssLoader loadWithURL:[[RSSChannelSelector sharedRSSChannel] getCurrentChannel]];
 }
 #pragma mark TableViewController life cycle
 - (void)viewDidLoad
@@ -42,6 +48,12 @@
 	self.rssItems = [[NSMutableArray alloc] init];
 	[self performSelector:@selector(fetchRssItems) withObject:nil];
 	[self.tableView reloadData];
+	
+	UIRefreshControl *refreshController = [[UIRefreshControl alloc]init];
+	refreshController.attributedTitle =[[NSAttributedString alloc] initWithString:@"Pull To Refresh"];
+	[refreshController addTarget:self action:@selector(refresh) forControlEvents:UIControlEventValueChanged];
+	refreshController.tintColor = [UIColor blackColor];
+	self.refreshControl = refreshController;
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -86,30 +98,28 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
 	if (self.rssLoader.loaded == NO)
-	{
-		NSLog(@"Prout");
 		return [self getLoadingTableCellWithTableView:tableView];
-	}
 	
-    RssItemCell *cell = [[[NSBundle mainBundle] loadNibNamed:@"RssItemCell" owner:self options:nil] objectAtIndex:0];
+	RssItemCell *cell = [tableView dequeueReusableCellWithIdentifier:@"RssItemCell"];
+	if(cell == nil)
+		cell = [[[NSBundle mainBundle] loadNibNamed:@"RssItemCell" owner:self options:nil] objectAtIndex:0];
         
 	RssItem* item = [self.rssItems objectAtIndex: indexPath.row];
-        
+	
+	
+	
 	cell.title.text = item.title;
 	cell.description.text = item.description;
 	[cell.enclosureLoader startAnimating];
-	cell.enclosureLoader.hidden = NO;
 	
 	dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0ul);
 	dispatch_async(queue,
 				   ^{
-					   UIImage *enclosure_rawImage = [[UIImage alloc] initWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:item.enclosure]]];
+					   UIImage *enclosure_rawImage = [[UIImage alloc] initWithData:[NSData dataWithContentsOfURL:item.enclosure]];
 					   [cell.enclosure  setImage:enclosure_rawImage];
 					   [cell.enclosureLoader stopAnimating];
-					   cell.enclosureLoader.hidden = YES;
 				   });
 
-	
     return cell;
 }
 
@@ -155,6 +165,8 @@
 {
 	self.rssItems = items;
 	[self.tableView reloadData];
+	[self.refreshControl endRefreshing];
+	self.refreshControl.attributedTitle =[[NSAttributedString alloc] initWithString:@"Pull To Refresh"];
 }
 
 - (void)updateFailedWithError:(NSError *)error
@@ -165,6 +177,7 @@
 #pragma mark - RSSChannelSelector delegate
 - (void)currentChannelChanged
 {
-	[self.rssLoader loadWithURL:[self.selector getCurrentChannel]];
+	[self.refreshControl beginRefreshing];
+	[self.rssLoader loadWithURL:[[RSSChannelSelector sharedRSSChannel] getCurrentChannel]];
 }
 @end

@@ -7,8 +7,10 @@
 //
 
 #import "DetailViewController.h"
+#import "RssItem.h"
 
 @interface DetailViewController ()
+- (void)saveItem:(RssItem *)item;
 @end
 
 
@@ -16,6 +18,10 @@
 
 @synthesize webview, rssItem;
 
+- (void)saveItem:(RssItem *)item
+{
+	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+}
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -42,6 +48,11 @@
 - (IBAction)onBackButtonPressed:(id)sender
 {
 	[self.webview goBack];
+}
+
+- (IBAction)onTouchUpInsideAddToFavorites:(id)sender
+{
+	[self saveItem:self.rssItem];
 }
 
 - (IBAction)onForwardButtonPressed:(id)sender

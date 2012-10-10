@@ -38,14 +38,7 @@
 
 - (id)initWithArray:(NSDictionary *)dictionnary
 {
-	title = [[NSString alloc] initWithString:[dictionnary objectForKey:@"title"]];
-	
-	NSString *rawDescription = [[NSString alloc ] initWithString:[dictionnary objectForKey:@"description"]];
-	description = [rawDescription gtm_stringByUnescapingFromHTML];
-	
-	link = [[NSURL alloc] initWithString:[dictionnary objectForKey:@"link"]];
-
-	
+	//Should be implemented..
 	return self;
 }
 
@@ -61,14 +54,13 @@
 	if(rawDescription)
 		 unescapedDescription = [rawDescription gtm_stringByUnescapingFromHTML];
 	
-	NSLog(@"DEBUG unescapedDescription : %@ \n", unescapedDescription);
 	NSRange rangeOfSubstring = [unescapedDescription rangeOfString:@"<img"];
 	
 	if(rangeOfSubstring.location != NSNotFound)
 		description = [unescapedDescription substringToIndex:rangeOfSubstring.location];
 	
 	
-	enclosure = [[xmlElement nodeForXPath:@"enclosure/attribute::url" error:&error] stringValue];
+	enclosure = [NSURL URLWithString:[[xmlElement nodeForXPath:@"enclosure/attribute::url" error:&error] stringValue]];
 	
 	link = [[NSURL alloc] initWithString:[[xmlElement nodeForXPath:@"link" error:nil] stringValue]];
 	

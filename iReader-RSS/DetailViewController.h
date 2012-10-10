@@ -21,5 +21,6 @@
 
 - (IBAction)onForwardButtonPressed:(id)sender;
 - (IBAction)onBackButtonPressed:(id)sender;
+- (IBAction)onTouchUpInsideAddToFavorites:(id)sender;
 
 @end
