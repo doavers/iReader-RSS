@@ -1,1 +1,1 @@
-RSS reader written in "modern Objective-C" as a model-application for "quick-design" training in Xcode 4.5 iOS 6+
+RSS reader written in "modern Objective-C" as a model-application for "quick-design" training in Xcode 4.5/iOS 6+
