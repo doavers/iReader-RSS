@@ -14,10 +14,10 @@
 
 @property NSString *channel;
 @property NSString *title;
-@property NSURL *link;
+@property NSString *absoluteFeedUrl;
 @property NSString *date;
 @property NSString *description;
-@property NSURL *enclosure;
+@property NSData *enclosure;
 
 - (id)init;
 - (id)initWithArray:(NSDictionary *) dictionary;

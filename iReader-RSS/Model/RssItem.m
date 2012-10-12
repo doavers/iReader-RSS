@@ -21,7 +21,7 @@
 @synthesize title;
 @synthesize date;
 @synthesize description;
-@synthesize link;
+@synthesize absoluteFeedUrl;
 @synthesize enclosure;
 
 - (id)init
@@ -30,7 +30,7 @@
 	{
 		title = nil;
 		description = nil;
-		link = nil;
+		absoluteFeedUrl = nil;
 	}
 	
 	return self;
@@ -38,7 +38,7 @@
 
 - (id)initWithArray:(NSDictionary *)dictionnary
 {
-	//Should be implemented..
+#warning TODO
 	return self;
 }
 
@@ -60,11 +60,11 @@
 		description = [unescapedDescription substringToIndex:rangeOfSubstring.location];
 	
 	
-	enclosure = [NSURL URLWithString:[[xmlElement nodeForXPath:@"enclosure/attribute::url" error:&error] stringValue]];
+	enclosure = [NSData  dataWithContentsOfURL:[NSURL URLWithString:[[xmlElement nodeForXPath:@"enclosure/attribute::url" error:&error] stringValue]]];
 	
-	link = [[NSURL alloc] initWithString:[[xmlElement nodeForXPath:@"link" error:nil] stringValue]];
+	absoluteFeedUrl = [[xmlElement nodeForXPath:@"link" error:nil] stringValue];
 	
-	//[self debugLogs];
+	[self debugLogs];
 	return self;
 }
 
@@ -76,7 +76,7 @@
 	NSLog(@"Date: %@", date);
 	NSLog(@"Description: %@", description);
 	NSLog(@"Enclosure: %@", enclosure);
-	NSLog(@"link: %@\n", link);
+	NSLog(@"link: %@\n", absoluteFeedUrl);
 	NSLog(@"------------------------------------\n");
 }
 				 

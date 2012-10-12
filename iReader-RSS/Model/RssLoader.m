@@ -12,7 +12,7 @@
 
 - (void)dispatchLoadingOperationWithURL:(NSURL *)url;
 - (RssItem *)getRssItemFromXmlElement:(CXMLElement *)xmlElement;
-- (void)fetchRssFromUrl:(NSURL*)url;
+- (void)fetchFeedsFromUrl:(NSURL*)url;
 
 @end
 
@@ -29,7 +29,7 @@
 	return self;
 }
 
-- (void)loadWithURL:(NSURL *)url
+- (void)updateFeedsWithURL:(NSURL *)url
 {
 	[self dispatchLoadingOperationWithURL:url];
 }
@@ -38,7 +38,7 @@
 {
 	NSOperationQueue *queue = [NSOperationQueue new];
 	NSInvocationOperation *operation = [[NSInvocationOperation alloc] initWithTarget:self
-																			selector:@selector(fetchRssFromUrl:)
+																			selector:@selector(fetchFeedsFromUrl:)
 																			  object:url];
 	
 	[queue addOperation:operation];
@@ -49,9 +49,9 @@
 	return [[RssItem alloc]initWithXmlElement:xmlElement];
 }
 
-- (void)fetchRssFromUrl:(NSURL *)url
-{
-
+- (void)fetchFeedsFromUrl:(NSURL *)url
+{	
+	NSLog(@"Fetching Rss from this URL: %@", url.absoluteString);
 	NSError *error;
 	CXMLDocument *parser = [[CXMLDocument alloc] initWithContentsOfURL:url options:0 error:&error];
 	if(!parser)
@@ -60,17 +60,19 @@
 		return; 
 	}
 	
+	NSLog(@"Rss fetched without problems.");
 	self.loaded = YES;
 	
+	NSLog(@"Creating XML nodes from content fetched.");
 	NSArray *xmlElements = [[parser rootElement] nodesForXPath:@"channel//item" error:nil];
-	
-	
 	NSMutableArray* rssItems = [NSMutableArray arrayWithCapacity:xmlElements.count];
+	
+	NSLog(@"Creating logic item from xml data...");
 	for(CXMLElement *xmlElement in xmlElements)
 		[rssItems addObject: [self getRssItemFromXmlElement:xmlElement]];
-	
 
-	[self.delegate performSelectorOnMainThread:@selector(rssItemsUpdated:) withObject:rssItems waitUntilDone:YES];
+	NSLog(@"Transmitting feeds to the manager...");
+	[self.delegate rssItemsUpdated:rssItems];
 }
 
 

@@ -7,7 +7,9 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "RssManager.h"
 
 @interface FavoritesViewController : UICollectionViewController
 
+@property RssManager *manager;
 @end

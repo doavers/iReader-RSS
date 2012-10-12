@@ -8,14 +8,11 @@
 
 #import <UIKit/UIKit.h>
 #import "RssLoader.h"
-#import "RSSChannelSelector.h"
+#import "RssManager.h"
 
-@interface RootViewController : UITableViewController <RSSLoaderDelegate, RSSChannelSelectorDelegate>
+@interface RootViewController : UITableViewController <RssManagerDelegate, UIAlertViewDelegate>
 
-@property RssLoader *rssLoader;
-@property NSMutableArray *rssItems;
+@property RssManager *manager;
 @property BOOL connected;
-
-- (void)fetchRssItems;
 
 @end

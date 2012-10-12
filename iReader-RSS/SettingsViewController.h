@@ -7,9 +7,8 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "RSSChannelSelector.h"
-
+#import "RssManager.h"
 @interface SettingsViewController : UITableViewController
 
-@property RSSChannelSelector *selector;
+@property RssManager *manager;
 @end

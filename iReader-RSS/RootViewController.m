@@ -16,44 +16,34 @@
 
 @implementation RootViewController
 
-- (void)fetchRssItems
-{
-	if(self.rssLoader == nil)
-	{
-		self.rssLoader = [[RssLoader alloc] init];
-		self.rssLoader.delegate = self;
-	}
-	[RSSChannelSelector sharedRSSChannel].delegate = self;
-	[[RSSChannelSelector sharedRSSChannel] setCurrentChannelFromString:Key_LeMondeTechnologies];
-
-}
-
 - (void)refresh
 {
 	self.refreshControl.attributedTitle =[[NSAttributedString alloc] initWithString:@"Refreshing"];
-	[self.rssLoader loadWithURL:[[RSSChannelSelector sharedRSSChannel] getCurrentChannel]];
+	[self.manager loadFeeds];
 }
-#pragma mark TableViewController life cycle
+
+#pragma mark - TableViewController life cycle
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-	
 	self.navigationItem.title = @"Articles";
-	self.rssItems = nil;
-	self.rssLoader = nil;
-	
-#warning TODO: Test if the internet connection is reachable.
-	
-	self.connected = YES;
-	self.rssItems = [[NSMutableArray alloc] init];
-	[self performSelector:@selector(fetchRssItems) withObject:nil];
-	[self.tableView reloadData];
-	
+
+#pragma mark - UIRefreshControl
+	/*
+	 * UIREFRESHCONTROL
+	 */
 	UIRefreshControl *refreshController = [[UIRefreshControl alloc]init];
 	refreshController.attributedTitle =[[NSAttributedString alloc] initWithString:@"Pull To Refresh"];
 	[refreshController addTarget:self action:@selector(refresh) forControlEvents:UIControlEventValueChanged];
 	refreshController.tintColor = [UIColor blackColor];
 	self.refreshControl = refreshController;
+	
+	self.manager = [RssManager sharedRssManager];
+	self.manager.delegate = self;
+	
+#warning TODO: Test if the internet connection is really reachable.	
+	self.connected = YES;
+	[self.manager reloadFeedsFromAbsolutreStringURL:Key_FeedsLeMondeTechnologies];
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -89,35 +79,29 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-	if (self.rssLoader.loaded)
-		return self.rssItems.count;
-	
-	return 1;
+	NSInteger nbRow = [[self.manager.feeds objectForKey:self.manager.currentChannel] count];
+	return MAX(1, nbRow);
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-	if (self.rssLoader.loaded == NO)
+	if (self.manager.loader.loaded == NO)
 		return [self getLoadingTableCellWithTableView:tableView];
 	
 	RssItemCell *cell = [tableView dequeueReusableCellWithIdentifier:@"RssItemCell"];
-	if(cell == nil)
-		cell = [[[NSBundle mainBundle] loadNibNamed:@"RssItemCell" owner:self options:nil] objectAtIndex:0];
-        
-	RssItem* item = [self.rssItems objectAtIndex: indexPath.row];
+ 
+	RssItem *feed = [[self.manager.feeds objectForKey:self.manager.currentChannel] objectAtIndex:indexPath.row];
 	
-	
-	
-	cell.title.text = item.title;
-	cell.description.text = item.description;
-	[cell.enclosureLoader startAnimating];
+	cell.title.text = feed.title;
+	cell.description.text = feed.description;
+	[cell.enclosure setImage:[UIImage imageNamed:@"placeholder_rss.png"]];
 	
 	dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0ul);
 	dispatch_async(queue,
 				   ^{
-					   UIImage *enclosure_rawImage = [[UIImage alloc] initWithData:[NSData dataWithContentsOfURL:item.enclosure]];
-					   [cell.enclosure  setImage:enclosure_rawImage];
-					   [cell.enclosureLoader stopAnimating];
+					   UIImage *image = [[UIImage alloc] initWithData:feed.enclosure];
+					   [cell.enclosure  setImage:image];
+					   [cell setNeedsLayout];
 				   });
 
     return cell;
@@ -147,37 +131,44 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-	[self performSegueWithIdentifier:@"RssItemDetail" sender:self];
+	[self performSegueWithIdentifier:@"Feeds" sender:self];
 }
 
 
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
-	if([segue.identifier isEqualToString:@"RssItemDetail"])
+	if([segue.identifier isEqualToString:@"Feeds"])
 	{
 		DetailViewController *controller = [segue destinationViewController];
-		controller.rssItem = [self.rssItems objectAtIndex:self.tableView.indexPathForSelectedRow.row];
+		controller.feed = [[self.manager.feeds objectForKey:self.manager.currentChannel]objectAtIndex:self.tableView.indexPathForSelectedRow.row];
 	}
 }
 
-#pragma mark - RssLoader delegate
-- (void)rssItemsUpdated:(NSMutableArray *)items
+#pragma mark - RssManager delegates
+- (void)feedsLoadedForChannel:(NSString *)channel
 {
-	self.rssItems = items;
+	NSLog(@"Feeds received.");
 	[self.tableView reloadData];
 	[self.refreshControl endRefreshing];
-	self.refreshControl.attributedTitle =[[NSAttributedString alloc] initWithString:@"Pull To Refresh"];
 }
 
-- (void)updateFailedWithError:(NSError *)error
+- (void)feedsLoadFailedWithError:(NSError *)error
 {
-	[[[UIAlertView alloc] initWithTitle:@"Error" message:[error description] delegate:nil cancelButtonTitle:@"Ok"otherButtonTitles:nil] show];
+	NSString *errorMessage = [NSString stringWithFormat:@"Une erreur s'est produite lors du chargement de votre flux RSS: %@\n", error.localizedDescription];
+	
+	UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"Problème de chargement" message:errorMessage delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
+	
+	[alert show];
 }
 
-#pragma mark - RSSChannelSelector delegate
-- (void)currentChannelChanged
+
+#pragma mark - UIAlertView delegates
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
 {
-	[self.refreshControl beginRefreshing];
-	[self.rssLoader loadWithURL:[[RSSChannelSelector sharedRSSChannel] getCurrentChannel]];
+	NSLog(@"User notified");
+	[self.refreshControl endRefreshing];
 }
+
+
+
 @end

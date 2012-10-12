@@ -13,6 +13,5 @@
 @property (strong, nonatomic) IBOutlet UILabel *title;
 @property (strong, nonatomic) IBOutlet UIImageView *enclosure;
 @property (strong, nonatomic) IBOutlet UILabel *description;
-@property (strong, nonatomic) IBOutlet UIActivityIndicatorView *enclosureLoader;
 
 @end

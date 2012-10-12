@@ -18,9 +18,9 @@
 
 @interface RssLoader : NSObject
 
-@property UIViewController<RSSLoaderDelegate> *delegate;
+@property NSObject<RSSLoaderDelegate> *delegate;
 @property BOOL loaded;
 
-- (void)loadWithURL:(NSURL*)url;
+- (void)updateFeedsWithURL:(NSURL*)url;
 
 @end

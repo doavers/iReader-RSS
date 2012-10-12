@@ -16,7 +16,7 @@
     [super viewDidLoad];
 	
 	self.navigationItem.title = @"Réglages";
-	self.selector = [RSSChannelSelector sharedRSSChannel];
+	self.manager = [RssManager sharedRssManager];
 }
 
 
@@ -33,30 +33,33 @@
 	switch (indexPath.row)
 	{
 		case 0:
-			[self.selector setCurrentChannelFromString:key_LeMondeAlaUne];
+			[self.manager reloadFeedsFromAbsolutreStringURL:key_FeedsLeMondeAlaUne];
 			break;
 		case 1:
-			[self.selector setCurrentChannelFromString:key_LeMondeCulture];
+			[self.manager reloadFeedsFromAbsolutreStringURL:key_FeedsLeMondeCulture];
 			break;
 		case 2:
-			[self.selector setCurrentChannelFromString:Key_LeMondeEconomie];
+			[self.manager reloadFeedsFromAbsolutreStringURL:Key_FeedsLeMondeEconomie];
 			break;
 		case 3:
-			[self.selector setCurrentChannelFromString:key_LeMondeLitterature];
+			[self.manager reloadFeedsFromAbsolutreStringURL:key_FeedsLeMondeLitterature];
 			break;
 		case 4:
-			[self.selector setCurrentChannelFromString:key_LeMondePolitique];
+			[self.manager reloadFeedsFromAbsolutreStringURL:key_FeedsLeMondePolitique];
 			break;
 		case 5:
-			[self.selector setCurrentChannelFromString:key_LeMondeInternational];
+			[self.manager reloadFeedsFromAbsolutreStringURL:
+			 key_FeedsLeMondeInternational];
 			break;
 		case 6:
-			[self.selector setCurrentChannelFromString:key_LeMondeSport];
+			[self.manager reloadFeedsFromAbsolutreStringURL:key_FeedsLeMondeSport];
 			break;
 		case 7:
-			[self.selector setCurrentChannelFromString:Key_LeMondeTechnologies];
+			[self.manager reloadFeedsFromAbsolutreStringURL:Key_FeedsLeMondeTechnologies];
 			break;
+			
 		default:
+			[self.manager reloadFeedsFromAbsolutreStringURL:Key_FeedsLeMondeTechnologies];
 			break;
 	}
 }

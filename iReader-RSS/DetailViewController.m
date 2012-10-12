@@ -7,35 +7,19 @@
 //
 
 #import "DetailViewController.h"
-#import "RssItem.h"
 
 @interface DetailViewController ()
-- (void)saveItem:(RssItem *)item;
+- (void) saveFeed;
 @end
-
 
 @implementation DetailViewController
 
-@synthesize webview, rssItem;
-
-- (void)saveItem:(RssItem *)item
-{
-	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-}
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
-{
-    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
-    if (self)
-	{
-		
-    }
-    return self;
-}
+@synthesize webview, feed;
 
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-	[webview loadRequest:[NSURLRequest requestWithURL:self.rssItem.link]];
+	[webview loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:self.feed.absoluteFeedUrl]]];
 	self.webview.delegate = self;
 }
 
@@ -52,7 +36,7 @@
 
 - (IBAction)onTouchUpInsideAddToFavorites:(id)sender
 {
-	[self saveItem:self.rssItem];
+	[[RssManager sharedRssManager] addFeedToFavorites:feed];
 }
 
 - (IBAction)onForwardButtonPressed:(id)sender
@@ -94,4 +78,10 @@
 	self.loader.hidden = YES;
 	[self.loader stopAnimating];
 }
+
+- (void)saveFeed
+{
+	[[RssManager sharedRssManager] addFeedToFavorites:self.feed];
+}
+
 @end
